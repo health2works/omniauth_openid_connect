@@ -8,6 +8,7 @@ class StrategyTestCase < MiniTest::Test
   def setup
     @identifier = '1234'
     @secret = '1234asdgat3'
+    @signed_jwt = 'this_is_a_signed_jwt'
   end
 
   def client
@@ -46,6 +47,7 @@ class StrategyTestCase < MiniTest::Test
       strategy.options.client_options.secret = @secret
       strategy.stubs(:request).returns(request)
       strategy.stubs(:user_info).returns(user_info)
+      strategy.stubs(:nhs_client_assertion).returns(@signed_jwt)
     end
   end
 end

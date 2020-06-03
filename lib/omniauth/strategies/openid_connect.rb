@@ -204,8 +204,21 @@ module OmniAuth
       def access_token
         @access_token ||= client.access_token!(
           scope: (options.scope if options.send_scope_to_token_endpoint),
-          client_auth_method: options.client_auth_method
+          client_auth_method: options.client_auth_method,
+          client_assertion: nhs_client_assertion
         )
+      end
+
+      def nhs_client_assertion
+        require 'json/jwt'
+        params[:client_assertion] = JSON::JWT.new(
+          iss: client_options.identifier,
+          sub: client_options.identifier,
+          aud: client_options.token_endpoint,
+          jti: SecureRandom.hex(16),
+          iat: Time.now,
+          exp: 3.minutes.from_now,
+        ).sign(client_options.secret, :RS512).to_s
       end
 
       def decode_id_token(id_token)

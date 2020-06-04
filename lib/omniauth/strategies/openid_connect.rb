@@ -287,9 +287,11 @@ module OmniAuth
       end
 
       def redirect_uri
-        return client_options.redirect_uri unless params['redirect_uri']
-
-        "#{ client_options.redirect_uri }?redirect_uri=#{ CGI.escape(params['redirect_uri']) }"
+        if request.port
+          "#{request.scheme}://#{request.host}:#{request.port}/auth/openid_connect/callback"
+        else
+          "#{request.scheme}://#{request.host}/auth/openid_connect/callback"
+        end
       end
 
       def encoded_post_logout_redirect_uri

@@ -7,6 +7,7 @@ require 'open-uri'
 require 'omniauth'
 require 'openid_connect'
 require 'forwardable'
+require 'securerandom'
 
 module OmniAuth
   module Strategies
@@ -156,6 +157,7 @@ module OmniAuth
       end
 
       def authorize_uri
+        #abort
         client.redirect_uri = redirect_uri
         opts = {
           response_type: options.response_type,
@@ -169,6 +171,9 @@ module OmniAuth
           nonce: (new_nonce if options.send_nonce),
           hd: options.hd,
           acr_values: options.acr_values,
+          asserted_login_identity: rp1_asserted_login_identity,
+          #asserted_login_identity: signed_jwt_for_nhs_sso,
+          #asserted_login_identity: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzUxMiJ9.eyJjb2RlIjoiZWY5ZWI2MDgtNWQ1Ni00OGJjLWFlNWUtYWM0ODliMDkyZDAzIiwiaXNzIjoicmVjYXAtaGVhbHRoIiwianRpIjoiMTYxMTg0NTg2OS8zOGU1MDNhOTg0NTc4ODJjYzA0NWU5OWFkNWZiNzU5YWNkMjMiLCJpYXQiOjE2MTE4NDU4NjksImV4cCI6MTYxMTg0NTkyOX0.DBC7Dy8sefoPnVyxZgHkrCmdlX4fTXARneZJrNlP__SGmnNigXGmAX9qFSdKizL173zaHVvxU2Crxag5N4bvDX1chfOkpoqeyv3_PZJVjuswlM7XkYcEPF03KvTzfU0J2NWfd8WngI5mqsyZyZeY6zKsXeDyZudbfj2R3k8KE9KDYlx_XXVLvnsstuXjy8b258zq-CgxNoVYVD8sHpVo6jXDGE6pP90VGmcN7GAmNyZ_MSUJznbc8U2lwuc0dndISDwDbApdPnG8NP-QJRplgSKurwMsu4S-ZTL8KC7GSbv1jzr5HvFX-Lpshyim_35kCJotZRAAtKHqu8TWkhJ6_g',
         }
         client.authorization_uri(opts.reject { |_k, v| v.nil? })
       end
@@ -218,6 +223,24 @@ module OmniAuth
           jti: SecureRandom.hex(16),
           iat: Time.now,
           exp: 3.minutes.from_now,
+        ).sign(client_options.secret, :RS512).to_s
+      end
+
+      def rp1_asserted_login_identity
+        request.env["rack.request.query_hash"]["asserted_login_identity"]
+      end
+
+      def signed_jwt_for_nhs_sso
+        require 'json/jwt'
+        iat = Time.now.to_i
+        jti = "#{iat}/#{SecureRandom.hex(18)}"
+        payload = JSON::JWT.new(
+          #code: 'ef9eb608-5d56-48bc-ae5e-ac489b092d03',  # current_user.jti
+          code: request.env["rack.request.query_hash"]["asserted_login_identity"], # User.jti
+          iss: client_options.identifier,
+          jti: jti,
+          iat: iat,
+          exp: 60.seconds.from_now,
         ).sign(client_options.secret, :RS512).to_s
       end
 

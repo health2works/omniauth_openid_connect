@@ -310,6 +310,8 @@ module OmniAuth
       end
 
       def redirect_uri
+        #Added this because the port appears to be always set (on heroku at leaset) to 443
+        return ENV["OP_REDIRECT_URI"] if ENV["OP_REDIRECT_URI"] 
         if request.port
           "#{request.scheme}://#{request.host}:#{request.port}/auth/openid_connect/callback"
         else

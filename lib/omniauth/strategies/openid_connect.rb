@@ -56,6 +56,7 @@ module OmniAuth
       option :client_auth_method
       option :post_logout_redirect_uri
       option :uid_field, 'sub'
+      option :vtr
 
       def uid
         user_info.public_send(options.uid_field.to_s)
@@ -172,7 +173,7 @@ module OmniAuth
           hd: options.hd,
           acr_values: options.acr_values,
           asserted_login_identity: rp1_asserted_login_identity,
-          vtr: '["P0.Cp"]',
+          vtr: options.vtr,
           #asserted_login_identity: signed_jwt_for_nhs_sso,
           #asserted_login_identity: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzUxMiJ9.eyJjb2RlIjoiZWY5ZWI2MDgtNWQ1Ni00OGJjLWFlNWUtYWM0ODliMDkyZDAzIiwiaXNzIjoicmVjYXAtaGVhbHRoIiwianRpIjoiMTYxMTg0NTg2OS8zOGU1MDNhOTg0NTc4ODJjYzA0NWU5OWFkNWZiNzU5YWNkMjMiLCJpYXQiOjE2MTE4NDU4NjksImV4cCI6MTYxMTg0NTkyOX0.DBC7Dy8sefoPnVyxZgHkrCmdlX4fTXARneZJrNlP__SGmnNigXGmAX9qFSdKizL173zaHVvxU2Crxag5N4bvDX1chfOkpoqeyv3_PZJVjuswlM7XkYcEPF03KvTzfU0J2NWfd8WngI5mqsyZyZeY6zKsXeDyZudbfj2R3k8KE9KDYlx_XXVLvnsstuXjy8b258zq-CgxNoVYVD8sHpVo6jXDGE6pP90VGmcN7GAmNyZ_MSUJznbc8U2lwuc0dndISDwDbApdPnG8NP-QJRplgSKurwMsu4S-ZTL8KC7GSbv1jzr5HvFX-Lpshyim_35kCJotZRAAtKHqu8TWkhJ6_g',
         }
